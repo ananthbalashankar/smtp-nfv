@@ -1,0 +1,49 @@
+login: netanelga 
+Name&ID:Netanel Gabay , 303095228 
+ex3 -SMTP.
+
+
+SMTP
+1.) introduction:
+SMTP is a protocol which through it messages are sent from the sender mail server to the reipient mail server.
+
+
+This program is an implementation of a SMTP client side .
+With this program you can send email from one email to another.
+
+
+Structure of an SMTP email comunication:
+sender -->User Agent --->mail server of the sender---->SMTP----->mail server of the riecipnt--->User Agent --->sender.
+
+
+How SMTP works:
+1.The client side of the SMTP(which is the sender) gets the IP address and the host name of the server side of the SMTP(which is the mail server).
+2.The client opens a TCP socket connection and connects with port 25 to the server(the mail server deals with the accpet(),listen() and all of the socket server side functions ).
+3.The server and the client makes a "handshake": they introdoce themself to each other.
+4.The client sends the email via the socket to the server by using SMTP commands(HELO,MAIL FROM ,RCPT TO,DATA,QUIT).
+5.The server responds to each message of the client indicating if there was a error or not.
+6.The email is sent.
+
+
+2.)Program output:
+the program output is in this form:
+c:messge
+s:respond
+c:messgae
+s:respond
+...
+where c: is the clinet sending message to the server via the socket
+and     s: is the server responds to the client message.
+
+3.)How to run the program: 
+-open the Terminal.
+-compile the project by entering "make".
+-enter ./smtp   file.txt    mail_server   port_number.
+
+
+4.)Submitted files:
+Makefile-the file that take care of the compilation. The input file is named smtp.exe.
+main.c-source file containts the main function and all the functions for the program.
+
+
+
