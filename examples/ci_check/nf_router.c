@@ -244,7 +244,7 @@ packet_handler(struct rte_mbuf* pkt, struct onvm_pkt_meta* meta) {
         }
 
         for (i = 0; i < nf_count; i++) {
-	  if compare_ci(fwd_nf[i].norm, *ci) {
+	  if (compare_ci(fwd_nf[i].norm, *ci)) {
                         meta->destination = fwd_nf[i].dest;
                         meta->action = ONVM_NF_ACTION_TONF;
                         return 0;
