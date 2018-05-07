@@ -207,8 +207,12 @@ do_stats_display(struct rte_mbuf* pkt) {
         }
 }
 
-static bool compare_ci(struct ci_hdr c1, struct ci_hdr c2) {
-  return c1.sender == c2.sender && c1.recipient == c2.recipient && c1.subject == c2.subject && c1.attributes == c2.attributes && c1.tp == c2.tp;
+static int compare_ci(struct ci_hdr c1, struct ci_hdr c2) {
+  if (c1.sender == c2.sender && c1.recipient == c2.recipient && c1.subject == c2.subject && c1.attributes == c2.attributes && c1.tp == c2.tp) {
+    return 1;
+  } else {
+    return 0;
+  }
 }
 
 static int
