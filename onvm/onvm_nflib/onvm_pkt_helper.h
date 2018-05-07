@@ -168,7 +168,7 @@ int
 onvm_pkt_parse_ip(char * ip_str, uint32_t* dest);
 
 int
-onvm_pkt_parse_ci(char * ip_str, struct ci_hdr* dest);
+onvm_pkt_parse_ci(char * ci_str, struct ci_hdr* dest);
 
 /**
  * Parsing mac addr of form xx:xx:xx:xx:xx:xx into dest array
