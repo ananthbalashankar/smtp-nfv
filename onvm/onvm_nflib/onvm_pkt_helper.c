@@ -389,11 +389,11 @@ onvm_pkt_parse_ci(char *ci_str, struct ci_hdr *dest) {
         int ret;
         struct ci_hdr ci;
 
-        if (ip_str == NULL || dest == NULL) {
+        if (ci_str == NULL || dest == NULL) {
                 return -1;
         }
 
-        ret = sscanf(ip_str, "%u.%u.%u.%u.%u", &ci.source, &ci.destination, &ci.subject, &ci.attributes, &ci.tp);
+        ret = sscanf(ci_str, "%u.%u.%u.%u.%u", &ci.sender, &ci.recipient, &ci.subject, &ci.attributes, &ci.tp);
         if (ret != 5) {
                 return -1;
         }
