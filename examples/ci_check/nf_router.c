@@ -207,6 +207,10 @@ do_stats_display(struct rte_mbuf* pkt) {
         }
 }
 
+static bool compare_ci(struct ci_hdr c1, struct ci_hdr c2) {
+  return c1.sender == c2.sender && c1.recipient == c2.recipient && c1.subject == c2.subject && c1.attributes == c2.attributes && c1.tp == c2.tp;
+}
+
 static int
 packet_handler(struct rte_mbuf* pkt, struct onvm_pkt_meta* meta) {
         static uint32_t counter = 0;
@@ -236,7 +240,7 @@ packet_handler(struct rte_mbuf* pkt, struct onvm_pkt_meta* meta) {
         }
 
         for (i = 0; i < nf_count; i++) {
-                if (fwd_nf[i].norm == ci) {
+	  if compare_ci(fwd_nf[i].norm, &ci) {
                         meta->destination = fwd_nf[i].dest;
                         meta->action = ONVM_NF_ACTION_TONF;
                         return 0;
