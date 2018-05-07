@@ -49,6 +49,14 @@ struct rte_mbuf;
 struct tcp_hdr;
 struct udp_hdr;
 struct ipv4_hdr;
+struct ci_hdr {
+  uint8_t sender;
+  uint8_t recipient;
+  // Comma separated.
+  uint8_t attributes;
+  uint8_t subject;
+  uint8_t tp;
+};
 
 #define IP_PROTOCOL_TCP 6
 #define IP_PROTOCOL_UDP 17
@@ -117,6 +125,9 @@ onvm_pkt_udp_hdr(struct rte_mbuf* pkt);
 struct ipv4_hdr*
 onvm_pkt_ipv4_hdr(struct rte_mbuf* pkt);
 
+struct ci_hdr*
+onvm_pkt_ci_hdr(struct rte_mbuf* pkt);
+
 /**
  * Check the type of a packet. Return 1 if packet is of the specified type, else 0
  */
@@ -142,6 +153,9 @@ void
 onvm_pkt_print_udp(struct udp_hdr* hdr);
 
 void
+onvm_pkt_print_ci(struct ci_hdr* hdr);
+
+void
 onvm_pkt_print_ipv4(struct ipv4_hdr* hdr);
 
 void
@@ -152,6 +166,9 @@ onvm_pkt_print_ether(struct ether_hdr* hdr);
  */
 int
 onvm_pkt_parse_ip(char * ip_str, uint32_t* dest);
+
+int
+onvm_pkt_parse_ci(char * ip_str, struct ci_hdr* dest);
 
 /**
  * Parsing mac addr of form xx:xx:xx:xx:xx:xx into dest array

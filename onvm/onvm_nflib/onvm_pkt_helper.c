@@ -187,6 +187,22 @@ onvm_pkt_ipv4_hdr(struct rte_mbuf* pkt) {
         return ipv4;
 }
 
+struct ci_hdr*
+onvm_pkt_ci_hdr(struct rte_mbuf* pkt) {
+  struct ipv4_hdr* ipv4 = onvm_pkt_ipv4_hdr(pkt);
+
+        if (unlikely(ipv4 == NULL)) {  // Since we aren't dealing with IPv6 packets for now, we can ignore anything that isn't IPv4
+                return NULL;
+        }
+
+        if (ipv4->next_proto_id != IP_PROTOCOL_TCP) {
+                return NULL;
+        }
+
+        uint8_t* pkt_data = rte_pktmbuf_mtod(pkt, uint8_t*) + sizeof(struct ether_hdr) + sizeof(struct ipv4_hdr) + sizeof(struct tcp_hdr);
+        return (struct ci_hdr*)pkt_data;
+}
+
 
 int
 onvm_pkt_is_tcp(struct rte_mbuf* pkt) {
@@ -259,6 +275,15 @@ onvm_pkt_print_udp(struct udp_hdr* hdr) {
         printf("Destination Port: %" PRIu16 "\n", hdr->dst_port);
         printf("Length: %" PRIu16 "\n", hdr->dgram_len);
         printf("Checksum: %" PRIu16 "\n", hdr->dgram_cksum);
+}
+
+void
+onvm_pkt_print_ci(struct ci_hdr* hdr) {
+        printf("Sender: %" PRIu16 "\n", hdr->sender);
+        printf("Recipient: %" PRIu16 "\n", hdr->recipient);
+        printf("Subject: %" PRIu16 "\n", hdr->subject);
+        printf("Attribute: %" PRIu16 "\n", hdr->attributes);
+	printf("Transmission Principle: %" PRIu16 "\n", hdr->tp);
 }
 
 void
@@ -356,6 +381,23 @@ onvm_pkt_parse_ip(char *ip_str, uint32_t *dest) {
                 return -1;
         }
         *dest = IPv4(ip[0], ip[1], ip[2], ip[3]);
+        return 0;
+}
+
+int
+onvm_pkt_parse_ci(char *ci_str, struct ci_hdr *dest) {
+        int ret;
+        struct ci_hdr ci;
+
+        if (ip_str == NULL || dest == NULL) {
+                return -1;
+        }
+
+        ret = sscanf(ip_str, "%u.%u.%u.%u.%u", &ci.source, &ci.destination, &ci.subject, &ci.attributes, &ci.tp);
+        if (ret != 5) {
+                return -1;
+        }
+        *dest = ci;
         return 0;
 }
 
