@@ -223,20 +223,20 @@ packet_handler(struct rte_mbuf* pkt, struct onvm_pkt_meta* meta) {
 
         ci = onvm_pkt_ci_hdr(pkt);
 
-        /* If the packet doesn't have an IP header check if its an ARP, if so fwd it to the matched NF 
+        /* If the packet doesn't have an IP header check if its an ARP, if so fwd it to the matched NF*/
         if (ci == NULL) {
-                ci_hdr = onvm_pkt_ci_hdr(pkt);
+	  /*ci_hdr = onvm_pkt_ci_hdr(pkt);
                 for (i = 0; i < nf_count; i++) {
                   if (ci_hdr == fwd_nf[i].) {
                      meta->destination = fwd_nf[i].dest;
                      meta->action = ONVM_NF_ACTION_TONF;
                      return 0;
                   }
-                }
+		  }*/
                 meta->action = ONVM_NF_ACTION_DROP;
                 meta->destination = 0;
                 return 0;
-		}*/
+		}
 
         if (++counter == print_delay) {
                 do_stats_display(pkt);
