@@ -128,7 +128,7 @@ parse_app_args(int argc, char *argv[], const char *progname) {
 static int
 parse_router_config(void) {
         int ret, temp, i;
-        char ip[32];
+        char ci[32];
         FILE * cfg;
 
         cfg  = fopen(cfg_filename, "r");
@@ -166,7 +166,7 @@ parse_router_config(void) {
         fclose(cfg);
         printf("\nDest config (%d):\n",nf_count);
         for (i = 0; i < nf_count; i++) {
-	  onvm_pkt_print_ci(fwd_nf[i].norm);
+	  onvm_pkt_print_ci(&(fwd_nf[i].norm));
           printf(" %d\n", fwd_nf[i].dest);
         }
 
@@ -210,9 +210,7 @@ do_stats_display(struct rte_mbuf* pkt) {
 static int
 packet_handler(struct rte_mbuf* pkt, struct onvm_pkt_meta* meta) {
         static uint32_t counter = 0;
-        struct ether_hdr *eth_hdr;
-        struct arp_hdr *in_arp_hdr;
-        struct ipv4_hdr* ip;
+        struct ci_hdr* ci;
         int i;
 
         ci = onvm_pkt_ci_hdr(pkt);
