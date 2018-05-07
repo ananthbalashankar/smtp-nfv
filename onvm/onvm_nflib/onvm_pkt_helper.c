@@ -393,7 +393,7 @@ onvm_pkt_parse_ci(char *ci_str, struct ci_hdr *dest) {
                 return -1;
         }
 
-        ret = sscanf(ci_str, "%u.%u.%u.%u.%u", &ci.sender, &ci.recipient, &ci.subject, &ci.attributes, &ci.tp);
+        ret = sscanf(ci_str, "%u" SCNu8 ".%u" SCNu8 ".%u" SCNu8 ".%u" SCNu8 ".%u" SCNu8, &ci.sender, &ci.recipient, &ci.subject, &ci.attributes, &ci.tp);
         if (ret != 5) {
                 return -1;
         }
