@@ -405,8 +405,8 @@ int main(int argc, char *argv[]) {
 			ci.subject = 1
 			ci.attributes = 1
 			ci.tp = 1
-			ci_ptr = onvm_pkt_ci_hdr(pkt);
-			struct ci_hdr *ci_ptr = &ci;
+			struct ci_hdr *ci_ptr = onvm_pkt_ci_hdr(pkt);
+			ci_ptr = &ci;
                         pmeta = onvm_get_pkt_meta(pkt);
                         pmeta->destination = destination;
                         pmeta->action = ONVM_NF_ACTION_TONF;
