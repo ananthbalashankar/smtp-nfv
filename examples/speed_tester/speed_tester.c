@@ -385,6 +385,7 @@ int main(int argc, char *argv[]) {
                         struct ether_hdr *ehdr;
                         int j;
 
+			printf("Packet size %d", packet_size);
                         struct rte_mbuf *pkt = rte_pktmbuf_alloc(pktmbuf_pool);
 
                         /*set up ether header and set new packet size*/
