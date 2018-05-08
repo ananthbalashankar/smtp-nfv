@@ -411,7 +411,8 @@ int main(int argc, char *argv[]) {
 			struct ipv4_hdr *ipv4;
 			ipv4 = (struct ipv4_hdr *) rte_pktmbuf_append(pkt, sizeof(struct ipv4_hdr));
 			ipv4->next_proto_id = IP_PROTOCOL_TCP;
-
+			ipv4->version_ihl = 0b01000000;	
+		
 		        rte_pktmbuf_append(pkt, sizeof(struct tcp_hdr));	
 			//struct ci_hdr *ci = onvm_pkt_ci_hdr(pkt);
 			struct ci_hdr *ci;
