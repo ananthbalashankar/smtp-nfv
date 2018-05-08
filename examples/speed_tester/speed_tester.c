@@ -88,7 +88,7 @@ static uint8_t keep_running = 1;
 /*user defined packet size and destination mac address
 *size defaults to ethernet header length
 */
-static uint16_t packet_size = ETHER_HDR_LEN + sizeof(struct tcp_hdr) + sizeof(struct ipv4_hdr) + sizeof(struct ci_hdr);
+static uint16_t packet_size = ETHER_HDR_LEN + sizeof(struct tcp_hdr) + sizeof(struct ipv4_hdr) + sizeof(struct ci_hdr) + 1000;
 static uint8_t d_addr_bytes[ETHER_ADDR_LEN];
 
 /* Default number of packets: 128; user can modify it by -c <packet_number> in command line */
@@ -378,30 +378,44 @@ int main(int argc, char *argv[]) {
 #endif
                 packet_number = (packet_number? packet_number : DEFAULT_PKT_NUM);
 
-                printf("Creating %u packets to send to %u\n", packet_number, destination);
+                printf("Creating %u packets to send to %u of size %u\n", packet_number, destination, packet_size);
 
                 for (i = 0; i < packet_number; ++i) {
                         struct onvm_pkt_meta* pmeta;
                         struct ether_hdr *ehdr;
                         int j;
 
-			printf("Packet size %d", packet_size);
                         struct rte_mbuf *pkt = rte_pktmbuf_alloc(pktmbuf_pool);
 
                         /*set up ether header and set new packet size*/
-                        rte_pktmbuf_append(pkt, packet_size);
+                        ehdr = (struct ether_hdr *) rte_pktmbuf_append(pkt, ETHER_HDR_LEN);
+			/*if (pkt == NULL) {
+			 printf("Mem not allocated");
+			 return -1;
+			}
+			
 			ehdr = onvm_pkt_ether_hdr(pkt); 
-                        /*using manager mac addr for source
+                        using manager mac addr for source
                         *using input string for dest addr 
-                        */ 
+                        */
+			 
                         rte_eth_macaddr_get(0, &ehdr->s_addr);
-                        for (j = 0; j < ETHER_ADDR_LEN; ++j) {
+                        
+			printf("Packet size %u", packet_size);
+			fflush(stdout);
+			for (j = 0; j < ETHER_ADDR_LEN; ++j) {
                                 ehdr->d_addr.addr_bytes[j] = d_addr_bytes[j];
                         }
                         ehdr->ether_type = LOCAL_EXPERIMENTAL_ETHER;
 
-			
-			struct ci_hdr *ci = onvm_pkt_ci_hdr(pkt);
+			struct ipv4_hdr *ipv4;
+			ipv4 = (struct ipv4_hdr *) rte_pktmbuf_append(pkt, sizeof(struct ipv4_hdr));
+			ipv4->next_proto_id = IP_PROTOCOL_TCP;
+
+		        rte_pktmbuf_append(pkt, sizeof(struct tcp_hdr));	
+			//struct ci_hdr *ci = onvm_pkt_ci_hdr(pkt);
+			struct ci_hdr *ci;
+			ci = (struct ci_hdr *) rte_pktmbuf_append(pkt, sizeof(struct ci_hdr));
 			ci->sender = 0x01;
 			ci->recipient = 0x02;
 			ci->subject = 0x01;
@@ -410,6 +424,7 @@ int main(int argc, char *argv[]) {
                         pmeta = onvm_get_pkt_meta(pkt);
                         pmeta->destination = destination;
                         pmeta->action = ONVM_NF_ACTION_TONF;
+
                         pmeta->flags = ONVM_SET_BIT(0, SPEED_TESTER_BIT);
                         pkt->hash.rss = i;
                         pkt->port = 0;
