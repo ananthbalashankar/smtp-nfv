@@ -388,8 +388,8 @@ int main(int argc, char *argv[]) {
                         struct rte_mbuf *pkt = rte_pktmbuf_alloc(pktmbuf_pool);
 
                         /*set up ether header and set new packet size*/
-                        ehdr = (struct ether_hdr *) rte_pktmbuf_append(pkt, ETHER_HDR_LEN);
-
+                        _ = rte_pktmbuf_append(pkt, packet_size);
+			ehdr = onvm_pkt_ether_hdr(pkt) 
                         /*using manager mac addr for source
                         *using input string for dest addr 
                         */ 
@@ -399,6 +399,7 @@ int main(int argc, char *argv[]) {
                         }
                         ehdr->ether_type = LOCAL_EXPERIMENTAL_ETHER;
 
+			
 			struct ci_hdr *ci = onvm_pkt_ci_hdr(pkt);
 			ci->sender = 0x01;
 			ci->recipient = 0x02;
