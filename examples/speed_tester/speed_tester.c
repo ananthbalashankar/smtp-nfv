@@ -388,8 +388,8 @@ int main(int argc, char *argv[]) {
                         struct rte_mbuf *pkt = rte_pktmbuf_alloc(pktmbuf_pool);
 
                         /*set up ether header and set new packet size*/
-                        _ = rte_pktmbuf_append(pkt, packet_size);
-			ehdr = onvm_pkt_ether_hdr(pkt) 
+                        rte_pktmbuf_append(pkt, packet_size);
+			ehdr = onvm_pkt_ether_hdr(pkt); 
                         /*using manager mac addr for source
                         *using input string for dest addr 
                         */ 
