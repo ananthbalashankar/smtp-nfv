@@ -404,7 +404,7 @@ int main(int argc, char *argv[]) {
 			ci->recipient = 2;
 			ci->subject = 1;
 			ci->attributes = 1;
-			ci->tp = 1
+			ci->tp = 1;
                         pmeta = onvm_get_pkt_meta(pkt);
                         pmeta->destination = destination;
                         pmeta->action = ONVM_NF_ACTION_TONF;
