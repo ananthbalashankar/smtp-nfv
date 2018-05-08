@@ -88,7 +88,7 @@ static uint8_t keep_running = 1;
 /*user defined packet size and destination mac address
 *size defaults to ethernet header length
 */
-static uint16_t packet_size = ETHER_HDR_LEN;
+static uint16_t packet_size = ETHER_HDR_LEN + TCP_HDR_LEN + IPV4_HDR_LEN + sizeof(struct ci_hdr);
 static uint8_t d_addr_bytes[ETHER_ADDR_LEN];
 
 /* Default number of packets: 128; user can modify it by -c <packet_number> in command line */
