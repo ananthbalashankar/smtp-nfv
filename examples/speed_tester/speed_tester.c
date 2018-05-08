@@ -400,11 +400,11 @@ int main(int argc, char *argv[]) {
                         ehdr->ether_type = LOCAL_EXPERIMENTAL_ETHER;
 
 			struct ci_hdr *ci = onvm_pkt_ci_hdr(pkt);
-			ci->sender = 1;
-			ci->recipient = 2;
-			ci->subject = 1;
-			ci->attributes = 1;
-			ci->tp = 1;
+			ci->sender = 0x01;
+			ci->recipient = 0x02;
+			ci->subject = 0x01;
+			ci->attributes = 0x01;
+			ci->tp = 0x01;
                         pmeta = onvm_get_pkt_meta(pkt);
                         pmeta->destination = destination;
                         pmeta->action = ONVM_NF_ACTION_TONF;
