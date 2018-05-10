@@ -418,10 +418,10 @@ int main(int argc, char *argv[]) {
 			struct ci_hdr *ci;
 			ci = (struct ci_hdr *) rte_pktmbuf_append(pkt, sizeof(struct ci_hdr));
 			ci->sender = 0x01;
-			ci->recipient = 0x02;
+			ci->recipient = 0x01;
 			ci->subject = 0x01;
-			ci->attributes = 0x01;
-			ci->tp = 0x01;
+			ci->attributes = 0x00;
+			ci->tp = 0x00;
                         rte_pktmbuf_append(pkt, packet_size);
 			pmeta = onvm_get_pkt_meta(pkt);
                         pmeta->destination = destination;

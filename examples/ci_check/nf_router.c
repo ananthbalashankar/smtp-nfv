@@ -57,19 +57,24 @@
 
 #include "onvm_nflib.h"
 #include "onvm_pkt_helper.h"
+#include "uthash.h"
 
 #define NF_TAG "router"
 #define SPEED_TESTER_BIT 7
 
 /* router information */
 int nf_count;
+static uint32_t nf_table_size = 10;
 char * cfg_filename;
 struct forward_nf *fwd_nf;
 
 struct forward_nf {
-        struct ci_hdr norm;
+        struct ci_hdr key;
         uint8_t dest;
+	UT_hash_handle hh;
 };
+
+struct forward_nf *ci_norms = NULL;
 
 /* Struct that contains information about this NF */
 struct onvm_nf_info *nf_info;
@@ -93,15 +98,19 @@ static int
 parse_app_args(int argc, char *argv[], const char *progname) {
         int c = 0;
 
-        while ((c = getopt(argc, argv, "f:p:")) != -1) {
+        while ((c = getopt(argc, argv, "f:p:n:")) != -1) {
                 switch (c) {
                 case 'f':
                         cfg_filename = strdup(optarg);
                         break;
                 case 'p':
-                        print_delay = strtoul(optarg, NULL, 10);
-                        break;
-                case '?':
+                        //print_delay = strtoul(optarg, NULL, 10);
+                        nf_table_size = strtoul(optarg, NULL, 10);
+			break;
+                case 'n':
+			nf_table_size = strtoul(optarg, NULL, 10);
+			break;
+		case '?':
                         usage(progname);
                         if (optopt == 'd')
                                 RTE_LOG(INFO, APP, "Option -%c requires an argument.\n", optopt);
@@ -140,20 +149,23 @@ parse_router_config(void) {
         if (temp <= 0) {
                 rte_exit(EXIT_FAILURE, "Error parsing config, need at least one forward NF configuration\n");
         }
-        nf_count = temp;
-
-        fwd_nf = (struct forward_nf *)rte_malloc("router fwd_nf info", sizeof(struct forward_nf) * nf_count, 0);
-        if (fwd_nf == NULL) {
-                rte_exit(EXIT_FAILURE, "Malloc failed, can't allocate forward_nf array\n");
-        }
-
+	uint8_t j=0, k=0;
+        nf_count = nf_table_size;
         for (i = 0; i < nf_count; i++) {
-                ret = fscanf(cfg, "%s %d", ci, &temp);
+                /*ret = fscanf(cfg, "%s %d", ci, &temp);
                 if (ret != 2) {
                         rte_exit(EXIT_FAILURE, "Invalid backend config structure\n");
-                }
-
-                ret = onvm_pkt_parse_ci(ci, &fwd_nf[i].norm);
+                }*/
+		sprintf(ci, "1.1.1.%" SCNu8".%" SCNu8, j, k);
+		printf("%s\n",ci);
+		j++;
+		if (j==0) k++;
+		temp = 2;
+        	fwd_nf = (struct forward_nf *)rte_malloc("router fwd_nf info", sizeof(struct forward_nf), 0);
+        	if (fwd_nf == NULL) {
+                	rte_exit(EXIT_FAILURE, "Malloc failed, can't allocate forward_nf array\n");
+        	}
+                ret = onvm_pkt_parse_ci(ci, &(fwd_nf->key));
                 if (ret < 0) {
                         rte_exit(EXIT_FAILURE, "Error parsing config IP address #%d\n", i);
                 }
@@ -161,14 +173,16 @@ parse_router_config(void) {
                 if (temp < 0) {
                         rte_exit(EXIT_FAILURE, "Error parsing config dest #%d\n", i);
                 }
-                fwd_nf[i].dest = temp;
+                fwd_nf->dest = temp;
+		HASH_ADD(hh, ci_norms, key, sizeof(struct ci_hdr), fwd_nf);
         }
 
         fclose(cfg);
         printf("\nDest config (%d):\n",nf_count);
-        for (i = 0; i < nf_count; i++) {
-	  onvm_pkt_print_ci(&(fwd_nf[i].norm));
-          printf(" %d\n", fwd_nf[i].dest);
+	struct forward_nf *s;
+        for (s=ci_norms; s!=NULL; s=s->hh.next) {
+	  onvm_pkt_print_ci(&(s->key));
+          printf(" %d\n", s->dest);
         }
 
         return ret;
@@ -208,19 +222,20 @@ do_stats_display(struct rte_mbuf* pkt) {
         }
 }
 
+/*
 static int compare_ci(struct ci_hdr c1, struct ci_hdr c2) {
   if (c1.sender == c2.sender && c1.recipient == c2.recipient && c1.subject == c2.subject && c1.attributes == c2.attributes && c1.tp == c2.tp) {
     return 1;
   } else {
     return 0;
   }
-}
+}*/
 
 static int
 packet_handler(struct rte_mbuf* pkt, struct onvm_pkt_meta* meta) {
         static uint32_t counter = 0;
         struct ci_hdr* ci;
-        int i;
+       
 
         ci = onvm_pkt_ci_hdr(pkt);
 
@@ -245,14 +260,13 @@ packet_handler(struct rte_mbuf* pkt, struct onvm_pkt_meta* meta) {
                 counter = 0;
         }
 
-        for (i = 0; i < nf_count; i++) {
-	  if (compare_ci(fwd_nf[i].norm, *ci)) {
-                        //printf("Match found: %u\n", fwd_nf[i].dest);
-			meta->destination = fwd_nf[i].dest;
-                        meta->action = ONVM_NF_ACTION_TONF;
-			meta->flags = ONVM_SET_BIT(0, SPEED_TESTER_BIT);
-                        return 0;
-                }
+	struct forward_nf *p;
+	HASH_FIND(hh, ci_norms, ci, sizeof(struct ci_hdr), p);
+	if (p) {
+		meta->destination = p->dest;
+                meta->action = ONVM_NF_ACTION_TONF;
+		meta->flags = ONVM_SET_BIT(0, SPEED_TESTER_BIT);
+                return 0;
         }
 
 	printf("No match found\n");
