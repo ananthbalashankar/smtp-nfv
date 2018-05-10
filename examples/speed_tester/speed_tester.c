@@ -74,7 +74,7 @@
 #define SPEED_TESTER_BIT 7
 #define LOCAL_EXPERIMENTAL_ETHER 0x88B5
 #define DEFAULT_PKT_NUM 128
-#define MAX_PKT_NUM NF_QUEUE_RINGSIZE
+#define MAX_PKT_NUM 50000 
 
 /* Struct that contains information about this NF */
 struct onvm_nf_info *nf_info;
@@ -92,7 +92,7 @@ static uint16_t packet_size = ETHER_HDR_LEN + sizeof(struct tcp_hdr) + sizeof(st
 static uint8_t d_addr_bytes[ETHER_ADDR_LEN];
 
 /* Default number of packets: 128; user can modify it by -c <packet_number> in command line */
-static uint32_t packet_number = 0;
+static int packet_number = 0;
 
 /*
  * Variables needed to replay a pcap file
@@ -308,7 +308,7 @@ run_advanced_rings(void) {
 
 
 int main(int argc, char *argv[]) {
-        uint32_t i;
+        int i;
         int arg_offset;
         struct rte_mempool *pktmbuf_pool;
 
@@ -422,7 +422,8 @@ int main(int argc, char *argv[]) {
 			ci->subject = 0x01;
 			ci->attributes = 0x01;
 			ci->tp = 0x01;
-                        pmeta = onvm_get_pkt_meta(pkt);
+                        rte_pktmbuf_append(pkt, packet_size);
+			pmeta = onvm_get_pkt_meta(pkt);
                         pmeta->destination = destination;
                         pmeta->action = ONVM_NF_ACTION_TONF;
 

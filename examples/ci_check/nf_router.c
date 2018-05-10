@@ -62,7 +62,7 @@
 #define SPEED_TESTER_BIT 7
 
 /* router information */
-uint8_t nf_count;
+int nf_count;
 char * cfg_filename;
 struct forward_nf *fwd_nf;
 
@@ -247,7 +247,7 @@ packet_handler(struct rte_mbuf* pkt, struct onvm_pkt_meta* meta) {
 
         for (i = 0; i < nf_count; i++) {
 	  if (compare_ci(fwd_nf[i].norm, *ci)) {
-                        printf("Match found: %u\n", fwd_nf[i].dest);
+                        //printf("Match found: %u\n", fwd_nf[i].dest);
 			meta->destination = fwd_nf[i].dest;
                         meta->action = ONVM_NF_ACTION_TONF;
 			meta->flags = ONVM_SET_BIT(0, SPEED_TESTER_BIT);
